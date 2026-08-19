@@ -1,65 +1,85 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <readline/readline.h>
-#include <readline/history.h>
 
-#include "../include/lexer.h"
-#include "../include/token.h"
+#include "lexer.h"
+#include "token.h"
+#include "parser.h"
+#include "expand.h"
 
-int main()
+#define MAX_INPUT 1024
+
+int main(void)
 {
-    printf("=====================================\n");
-    printf("        Shellforge\n");
-    printf("  A Unix Style Shell written in C\n");
-    printf("=====================================\n");
+    char input[MAX_INPUT];
+
+    printf("====================================\n");
+    printf("          SHELLFORGE\n");
+    printf("A Unix Style Shell written in C\n");
+    printf("====================================\n");
 
     while (1)
     {
-        char *input = readline("shellforge$ ");
+        printf("\nshellforge> ");
+        fflush(stdout);
 
-        if (input == NULL)
+        if (fgets(input, sizeof(input), stdin) == NULL)
         {
-            printf("\nExiting...\n");
+            printf("\n");
             break;
         }
+
+        input[strcspn(input, "\n")] = '\0';
 
         if (strlen(input) == 0)
-        {
-            free(input);
             continue;
-        }
 
         if (strcmp(input, "exit") == 0)
-        {
-            free(input);
-            printf("Exiting...\n");
             break;
-        }
-
-        add_history(input);
 
         int token_count = 0;
 
         Token *tokens = lexer_tokenize(input, &token_count);
 
-        printf("\n------------ TOKENS ------------\n");
+        if (tokens == NULL)
+        {
+            fprintf(stderr, "Lexer error\n");
+            continue;
+        }
+
+        printf("\n=========== TOKENS ===========\n");
 
         for (int i = 0; i < token_count; i++)
         {
             print_token(tokens[i], i);
         }
 
-        printf("--------------------------------\n");
+        printf("==============================\n");
 
-        for (int i = 0; i < token_count; i++)
+        Pipeline pipeline;
+
+        if (parse_tokens(tokens, &pipeline) != 0)
         {
-            free_token(&tokens[i]);
+            fprintf(stderr, "Parser error\n");
+
+            for (int i = 0; i < token_count; i++)
+                free_token(&tokens[i]);
+
+            free(tokens);
+            continue;
         }
 
+        expand_pipeline(&pipeline);
+
+        print_pipeline(&pipeline);
+
+        for (int i = 0; i < token_count; i++)
+            free_token(&tokens[i]);
+
         free(tokens);
-        free(input);
     }
+
+    printf("\nShellforge terminated.\n");
 
     return 0;
 }
