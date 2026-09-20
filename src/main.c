@@ -6,6 +6,7 @@
 #include "token.h"
 #include "parser.h"
 #include "expand.h"
+#include "builtin.h"
 
 #define MAX_INPUT 1024
 
@@ -14,13 +15,13 @@ int main(void)
     char input[MAX_INPUT];
 
     printf("====================================\n");
-    printf("          SHELLFORGE\n");
+    printf("          Shellforge\n");
     printf("A Unix Style Shell written in C\n");
     printf("====================================\n");
 
     while (1)
     {
-        printf("\nshellforge> ");
+        printf("shellforge$ ");
         fflush(stdout);
 
         if (fgets(input, sizeof(input), stdin) == NULL)
@@ -34,9 +35,6 @@ int main(void)
         if (strlen(input) == 0)
             continue;
 
-        if (strcmp(input, "exit") == 0)
-            break;
-
         int token_count = 0;
 
         Token *tokens = lexer_tokenize(input, &token_count);
@@ -47,14 +45,14 @@ int main(void)
             continue;
         }
 
-        printf("\n=========== TOKENS ===========\n");
+        printf("\n-------------- TOKENS --------------\n");
 
         for (int i = 0; i < token_count; i++)
         {
             print_token(tokens[i], i);
         }
 
-        printf("==============================\n");
+        printf("-------------------------------------\n");
 
         Pipeline pipeline;
 
@@ -72,6 +70,15 @@ int main(void)
         expand_pipeline(&pipeline);
 
         print_pipeline(&pipeline);
+
+        if (handle_builtin(pipeline.commands[0].argv))
+        {
+            for (int i = 0; i < token_count; i++)
+                free_token(&tokens[i]);
+
+            free(tokens);
+            continue;
+        }
 
         for (int i = 0; i < token_count; i++)
             free_token(&tokens[i]);
