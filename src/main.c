@@ -19,6 +19,9 @@ int main(void)
     printf("          Shellforge\n");
     printf("A Unix Style Shell written in C\n");
     printf("====================================\n");
+    printf("Username : Lohitha\n");
+    printf("ID       : 2500032241\n");
+    printf("====================================\n");
 
     while (1)
     {
