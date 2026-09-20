@@ -7,6 +7,7 @@
 #include "parser.h"
 #include "expand.h"
 #include "builtin.h"
+#include "executor.h"
 
 #define MAX_INPUT 1024
 
@@ -79,6 +80,8 @@ int main(void)
             free(tokens);
             continue;
         }
+
+        execute_pipeline(&pipeline);
 
         for (int i = 0; i < token_count; i++)
             free_token(&tokens[i]);

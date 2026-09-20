@@ -3,7 +3,7 @@ CFLAGS = -Wall -Wextra -std=c11 -Iinclude
 
 TARGET = shellforge
 
-SRCS = src/main.c src/lexer.c src/token.c src/parser.c src/expand.c src/builtin.c
+SRCS = src/main.c src/lexer.c src/token.c src/parser.c src/expand.c src/builtin.c src/executor.c
 OBJS = $(SRCS:.c=.o)
 
 all: $(TARGET)
@@ -11,7 +11,7 @@ all: $(TARGET)
 $(TARGET): $(OBJS)
 	$(CC) $(CFLAGS) -o $(TARGET) $(OBJS)
 
-src/main.o: src/main.c include/lexer.h include/token.h include/parser.h include/expand.h include/builtin.h
+src/main.o: src/main.c include/lexer.h include/token.h include/parser.h include/expand.h include/builtin.h include/executor.h
 	$(CC) $(CFLAGS) -c src/main.c -o src/main.o
 
 src/lexer.o: src/lexer.c include/lexer.h include/token.h
@@ -28,6 +28,9 @@ src/expand.o: src/expand.c include/expand.h include/parser.h
 
 src/builtin.o: src/builtin.c include/builtin.h
 	$(CC) $(CFLAGS) -c src/builtin.c -o src/builtin.o
+
+src/executor.o: src/executor.c include/executor.h include/parser.h
+	$(CC) $(CFLAGS) -c src/executor.c -o src/executor.o
 
 clean:
 	rm -f $(OBJS) $(TARGET)
